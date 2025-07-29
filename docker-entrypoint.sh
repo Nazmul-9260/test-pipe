@@ -13,8 +13,8 @@ echo "Database is up!"
 
 # Ensure .env file exists, copy from .env.example if not present
 if [ ! -f ".env" ]; then
-    echo "Creating .env file from .env.example..."
-    cp .env.example .env
+    echo "Creating .env file from .env.main..."
+    cp .env.main .env
 fi
 
 # Generate application key if not already set
