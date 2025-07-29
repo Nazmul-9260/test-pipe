@@ -10,7 +10,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: "${env.BRANCH}",
-                    url: 'https://github.com/Nazmul-9260/forum-main',
+                    url: 'https://github.com/Nazmul-9260/test-pipe.git',
                     credentialsId: 'a34e62e9-4cc1-4cb0-a62f-80360737366d'
             }
         }
