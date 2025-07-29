@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = 'nazmul9260/forum-main'
+        VERSION = "${env.BUILD_NUMBER ?: 'latest'}"
+    }
+
     stages {
 
         stage('Approval') {
@@ -27,13 +32,20 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t nazmul9260/forum-main:latest .'
+                script {
+                    dockerImage = docker.build("${IMAGE_NAME}:${VERSION}")
+                }
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
-                sh 'docker push nazmul9260/forum-main:latest'
+                script {
+                    dockerImage.push()
+                    // Optional: update latest tag too
+                    sh "docker tag ${IMAGE_NAME}:${VERSION} ${IMAGE_NAME}:latest"
+                    sh "docker push ${IMAGE_NAME}:latest"
+                }
             }
         }
 
@@ -55,7 +67,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment succeeded!'
+            echo "✅ Deployment successful: ${IMAGE_NAME}:${VERSION}"
         }
         failure {
             echo '❌ Deployment failed!'
