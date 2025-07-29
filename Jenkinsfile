@@ -1,57 +1,64 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = 'nazmul9260/forum-main-app'
-        BRANCH = 'main'
-    }
-
     stages {
-        stage('Clone Repository') {
+
+        stage('Approval') {
             steps {
-                git branch: "${env.BRANCH}",
-                    url: 'https://github.com/Nazmul-9260/test-pipe.git',
-                    credentialsId: 'a34e62e9-4cc1-4cb0-a62f-80360737366d'
+                input message: 'Proceed with deployment to Docker?', ok: 'Yes, Deploy'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Clone Project') {
             steps {
-                script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${BRANCH}")
-                }
+                git branch: 'main',
+                    credentialsId: 'a34e62e9-4cc1-4cb0-a62f-80360737366d',
+                    url: 'https://github.com/Nazmul-9260/test-pipe.git'
             }
         }
 
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'c9038cd8-a265-4231-ac62-0c86d5b7194c', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage.push()
-                }
+                sh 'docker build -t nazmul9260/forum-main:latest .'
             }
         }
 
-        stage('Docker Logout') {
+        stage('Push to Docker Hub') {
             steps {
-                sh 'docker logout'
+                sh 'docker push nazmul9260/forum-main:latest'
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                sh '''
+                    docker-compose down || true
+                    docker-compose up -d
+                '''
+            }
+        }
+
+        stage('Show Running Containers') {
+            steps {
+                sh 'docker ps'
             }
         }
     }
 
     post {
-        failure {
-            echo '❌ Deployment failed!'
-        }
         success {
             echo '✅ Deployment succeeded!'
+        }
+        failure {
+            echo '❌ Deployment failed!'
         }
     }
 }
