@@ -45,4 +45,3 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Start PHP-FPM as the main process
 CMD ["php-fpm"]
-
