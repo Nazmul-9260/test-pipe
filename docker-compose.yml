@@ -70,6 +70,7 @@ services:
       - PMA_HOST=db
       - PMA_USER=forum-main
       - PMA_PASSWORD=Time@12345
+      - PMA_ARBITRARY=1
     ports:
       - "8085:80"
     depends_on:
