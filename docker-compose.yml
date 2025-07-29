@@ -68,6 +68,7 @@ services:
     restart: unless-stopped
     environment:
       - PMA_HOST=db
+      - PMA_PORT=3306
       #- PMA_USER=forum-main
       #- PMA_PASSWORD=Time@12345
       - PMA_ARBITRARY=1
