@@ -2,75 +2,37 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'nazmul9260/forum-main'
-        VERSION = "${env.BUILD_NUMBER ?: 'latest'}"
+        DOCKERHUB_CREDENTIALS = credentials('c9038cd8-a265-4231-ac62-0c86d5b7194c')
+        GITHUB_CREDENTIALS = credentials('a34e62e9-4cc1-4cb0-a62f-80360737366d')
     }
 
     stages {
-
-        stage('Approval') {
+        stage('Checkout') {
             steps {
-                input message: 'Proceed with deployment to Docker?', ok: 'Yes, Deploy'
-            }
-        }
-
-        stage('Clone Project') {
-            steps {
-                git branch: 'main',
-                    credentialsId: 'a34e62e9-4cc1-4cb0-a62f-80360737366d',
-                    url: 'https://github.com/Nazmul-9260/test-pipe.git'
-            }
-        }
-
-        stage('Docker Login') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'c9038cd8-a265-4231-ac62-0c86d5b7194c', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                }
+                git credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/Nazmul-9260/test-pipe.git', branch: 'main'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${VERSION}")
-                }
+                sh 'docker image prune -f'  // ✅ Old unused images clean
+                sh 'docker-compose -f docker-compose.yml down --volumes --remove-orphans'
+                sh 'docker-compose -f docker-compose.yml build'
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Run Containers') {
             steps {
-                script {
-                    dockerImage.push()
-                    // Optional: update latest tag too
-                    sh "docker tag ${IMAGE_NAME}:${VERSION} ${IMAGE_NAME}:latest"
-                    sh "docker push ${IMAGE_NAME}:latest"
-                }
-            }
-        }
-
-        stage('Deploy with Docker Compose') {
-            steps {
-                sh '''
-                    docker-compose down || true
-                    docker-compose up -d
-                '''
-            }
-        }
-
-        stage('Show Running Containers') {
-            steps {
-                sh 'docker ps'
+                sh 'docker-compose -f docker-compose.yml up -d'
             }
         }
     }
 
     post {
-        success {
-            echo "✅ Deployment successful: ${IMAGE_NAME}:${VERSION}"
-        }
-        failure {
-            echo '❌ Deployment failed!'
+        always {
+            echo 'Cleaning up...'
+            sh 'docker image prune -f'  // ✅ Final clean
         }
     }
 }
+    
