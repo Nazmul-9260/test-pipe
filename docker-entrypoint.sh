@@ -5,7 +5,7 @@ set -e
 
 # Wait for MySQL to be ready
 echo "Waiting for database connection..."
-until nc -z -v -w30 db 3306; do
+until nc -z -v -w30 db-develop 3306; do
   echo "Waiting for database..."
   sleep 5
 done
