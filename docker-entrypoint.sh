@@ -5,7 +5,7 @@ set -e
 
 # Wait for MySQL to be ready
 echo "Waiting for database connection..."
-until nc -z -v -w30 db-develop 3306; do
+until nc -z -v -w30 db-stage 3306; do
   echo "Waiting for database..."
   sleep 5
 done
@@ -13,8 +13,8 @@ echo "Database is up!"
 
 # Ensure .env file exists, copy from .env.example if not present
 if [ ! -f ".env" ]; then
-    echo "Creating .env file from .env.develop..."
-    cp .env.develop .env
+    echo "Creating .env file from .env.stage..."
+    cp .env.stage .env
 fi
 
 # Generate application key if not already set
