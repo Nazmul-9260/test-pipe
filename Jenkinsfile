@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/Nazmul-9260/test-pipe.git', branch: 'main'
+                git credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/Nazmul-9260/test-pipe.git', branch: 'develop'
             }
         }
 
