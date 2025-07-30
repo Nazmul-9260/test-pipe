@@ -1,86 +1,84 @@
 services:
-  # Laravel App (PHP-FPM)
-  app:
+  # Laravel App (Develop)
+  app-develop:
     build: .
-    container_name: laravel_app_main
+    container_name: laravel_app_develop
     restart: unless-stopped
     working_dir: /var/www
     volumes:
       - .:/var/www
       - /var/www/vendor
     depends_on:
-      db:
+      db-develop:
         condition: service_healthy
     networks:
-      - laravel_network
+      - laravel_network_develop
     environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
+      - APP_ENV=develop
+      - APP_DEBUG=true
       - DB_CONNECTION=mysql
-      - DB_HOST=db
+      - DB_HOST=db-develop
       - DB_PORT=3306
-      - DB_DATABASE=forum-main
-      - DB_USERNAME=forum-main
+      - DB_DATABASE=forum-develop
+      - DB_USERNAME=forum-develop
       - DB_PASSWORD=Time@12345
     ports:
-      - "9000:9000"
+      - "9001:9000"  # Internal port 9000, external 9001 (if needed)
 
-  # Nginx Web server
-  nginx:
+  # Nginx for Develop App
+  nginx-develop:
     image: nginx:latest
-    container_name: laravel_nginx
+    container_name: laravel_nginx_develop
     restart: unless-stopped
     ports:
-      - "8081:80"  # Laravel will be accessible on localhost:8081
+      - "8082:80"  # Access Laravel app via http://localhost:8082
     volumes:
       - .:/var/www
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - app
+      - app-develop
     networks:
-      - laravel_network
+      - laravel_network_develop
 
-  # MySQL Database
-  db:
+  # MySQL for Develop
+  db-develop:
     image: mysql:8.0
-    container_name: mysql_db
+    container_name: mysql_db_develop
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: Qsoft@12345#
-      MYSQL_DATABASE: forum-main
-      MYSQL_USER: forum-main
+      MYSQL_DATABASE: forum-develop
+      MYSQL_USER: forum-develop
       MYSQL_PASSWORD: Time@12345
     volumes:
-      - ./mysql_data:/var/lib/mysql
+      - ./mysql_develop_db:/var/lib/mysql   # 🔁 Bind mount for develop DB
     ports:
-      - "3306:3306"
+      - "3307:3306"  # External port 3307 to avoid conflict with main
     networks:
-      - laravel_network
+      - laravel_network_develop
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
       retries: 5
 
-  # ✅ phpMyAdmin
-  phpmyadmin:
+  # phpMyAdmin for Develop
+  phpmyadmin-develop:
     image: phpmyadmin/phpmyadmin
-    container_name: laravel_phpmyadmin
+    container_name: laravel_phpmyadmin_develop
     restart: unless-stopped
     environment:
-      - PMA_HOST=db
+      - PMA_HOST=db-develop
       - PMA_PORT=3306
-      #- PMA_USER=forum-main
-      #- PMA_PASSWORD=Time@12345
       - PMA_ARBITRARY=1
     ports:
-      - "8085:80"
+      - "8086:80"  # Access phpMyAdmin via http://localhost:8086
     depends_on:
-      - db
+      - db-develop
     networks:
-      - laravel_network
+      - laravel_network_develop
 
 networks:
-  laravel_network:
+  laravel_network_develop:
     driver: bridge
 
 #volumes:
