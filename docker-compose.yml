@@ -51,7 +51,7 @@ services:
       MYSQL_USER: forum-main
       MYSQL_PASSWORD: Time@12345
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
@@ -83,6 +83,6 @@ networks:
   laravel_network:
     driver: bridge
 
-volumes:
-  mysql_data:
-    driver: local
+#volumes:
+#  mysql_data:
+#    driver: local
