@@ -31,7 +31,9 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            sh 'docker image prune -f'  // ✅ Final clean
+            sh 'docker image prune -a -f'
+            sh 'docker container prune -f'
+            //sh 'docker image prune -f'  // ✅ Final clean
         }
     }
 }
