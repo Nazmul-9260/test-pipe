@@ -1,7 +1,8 @@
 services:
   # Laravel App (Develop)
   app-stage:
-    build: .
+    #build: .
+    image: nazmul9260/forum-stage:latest
     container_name: laravel_app_stage
     restart: unless-stopped
     working_dir: /var/www
