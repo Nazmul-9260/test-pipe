@@ -1,7 +1,8 @@
 services:
   # Laravel App (Develop)
   app-develop:
-    build: .
+    #build: .
+    image: nazmul9260/forum-develop:latest
     container_name: laravel_app_develop
     restart: unless-stopped
     working_dir: /var/www
