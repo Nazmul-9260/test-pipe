@@ -15,7 +15,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker image prune -f'  // Old unused images clean
+                sh 'docker image prune -f'  // ✅ Old unused images clean
                 sh 'docker-compose -f docker-compose.yml down --volumes --remove-orphans'
                 sh 'docker-compose -f docker-compose.yml build'
             }
@@ -26,16 +26,6 @@ pipeline {
                 sh 'docker-compose -f docker-compose.yml up -d'
             }
         }
-
-        stage('Laravel Cache Clear') {
-            steps {
-                // container নাম adjust করুন আপনার environment অনুযায়ী
-                sh 'docker exec laravel_nginx php artisan config:clear'
-                sh 'docker exec laravel_nginx php artisan route:clear'
-                sh 'docker exec laravel_nginx php artisan view:clear'
-                sh 'docker exec laravel_nginx composer install --no-interaction --prefer-dist --optimize-autoloader'
-            }
-        }
     }
 
     post {
@@ -43,6 +33,7 @@ pipeline {
             echo 'Cleaning up...'
             sh 'docker image prune -a -f'
             sh 'docker container prune -f'
+            //sh 'docker image prune -f'  // ✅ Final clean
         }
     }
 }
